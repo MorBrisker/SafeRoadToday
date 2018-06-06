@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.vl {
+border-left: 50px solid green;
+height: 3px;
+}
+</style>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
@@ -10,6 +17,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <![endif]-->
     <link href="css/styles.css" rel="stylesheet">
 </head>
@@ -68,13 +76,14 @@
                    placeholder="Enter an origin location">
             <input id="destination-input" class="controls" type="text"
                    placeholder="Enter a destination location">
+            <input type="button" id="nodeGoto" />
             <div id="map-canvas"></div>
             <br>
             <br>
             <br>
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 15px">
-                    Black = "Very High Risk"
+                    <div class="vl">Very High Risk</div>
                     <br>
                     Red = "Very High Risk"
                     <br>
