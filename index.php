@@ -2,10 +2,6 @@
 <html lang="en">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-.vl {
-border-left: 50px solid green;
-height: 3px;
-}
 </style>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -15,9 +11,12 @@ height: 3px;
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+
     <![endif]-->
     <link href="css/styles.css" rel="stylesheet">
 </head>
@@ -66,12 +65,12 @@ height: 3px;
     <div class="row">
         <div class="col-xs-3" id="left">
             <h2>Safe road today</h2>
-            Demo version 0.2
+            Demo version 2.0
             <br>
             <br>
-            <a id="toggleMarkers" href="#">ToggleMarkers (By default hide) </a>
+            <a id="toggleMarkers" href="#" class="links">ToggleMarkers (By default hide) </a>
             <br>
-            <a id="updateRoads" href="#">Update Roads</a>
+            <a id="updateRoads" href="#" class="links">Update Roads</a>
             <input id="origin-input" class="controls" type="text"
                    placeholder="Enter an origin location">
             <input id="destination-input" class="controls" type="text"
@@ -80,36 +79,35 @@ height: 3px;
             <div id="map-canvas"></div>
             <br>
             <br>
-            <br>
-            <div class="panel panel-default">
-                <div class="panel-heading" style="font-size: 15px">
-                    <div class="vl">Very High Risk</div>
-                    <br>
-                    Red = "Very High Risk"
-                    <br>
-                    Orange = "High Risk"
-                    <br>
-                    Yellow = "Very High Risk"
-                    <br>
-                    DarkBlue = "Very High Risk"
-                    <br>
-                    Aqua = "Low"
-                    <br>
-                    Grey = "Very Low"
-                </div>
-            </div>
-            <hr>
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 20px">Type your origin location and destination and find
                     out what is the safest road today.
                 </div>
             </div>
             <hr>
+            <div class="panel panel-default">
+                <div class="panel-heading" style="font-size: 15px">
+                    <div class="vl-black">&ensp;Super High Risk</div>
+                    <br>
+                    <div class="vl-red">&ensp;Very High Risk</div>
+                    <br>
+                    <div class="vl-orange">&ensp;High Risk</div>
+                    <br>
+                    <div class="vl-yellow">&ensp;Medium - High Risk</div>
+                    <br>
+                    <div class="vl-darkblue">&ensp;Medium Risk</div>
+                    <br>
+                    <div class="vl-aqua">&ensp;Low Risk</div>
+                    <br>
+                    <div class="vl-grey">&ensp;Undefined risk</div>
+                </div>
+            </div>
             <p>
                 <a href="http://bootply.com" target="_ext" class="center-block btn btn-primary">Set day and time</a>
-            </p>
-            <div style="height: 150px"></div>
-            <img src="biu_logo.jpg" width="400" style="padding-left: 20px;"/>
+                <br>
+                <img src="biu_logo.jpg" width="240" style="padding-left: 20px;" align="center"/>
+
+            </p\>
         </div>
         <div class="col-xs-9"><!--map-canvas will be postioned here--></div>
     </div>

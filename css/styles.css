@@ -90,3 +90,37 @@ body{
 #destination-input:focus {
   border-color: #4d90fe;
 }
+
+.vl-black {
+    border-left: 50px solid black;
+    height: 3px;
+}
+.vl-red {
+    border-left: 50px solid red;
+    height: 3px;
+}
+.vl-orange {
+    border-left: 50px solid orange;
+    height: 3px;
+}
+.vl-yellow {
+    border-left: 50px solid yellow;
+    height: 3px;
+}
+.vl-darkblue {
+    border-left: 50px solid darkblue;
+    height: 3px;
+}
+.vl-aqua {
+    border-left: 50px solid aqua;
+    height: 3px;
+}
+.vl-grey {
+    border-left: 50px solid grey;
+    height: 3px;
+}
+
+.vl {
+    border-left: 50px solid black;
+    height: 3px;
+}
