@@ -75,7 +75,8 @@
                    placeholder="Enter an origin location">
             <input id="destination-input" class="controls" type="text"
                    placeholder="Enter a destination location">
-            <input type="button" id="nodeGoto" />
+
+
             <div id="map-canvas"></div>
             <br>
             <br>
@@ -85,6 +86,12 @@
                 </div>
             </div>
             <hr>
+
+            <input type="button" id="current-location" value="blabla" />
+            <hr>
+            <input type="button" id="r0" value="0" />
+            <hr>
+            <input type="button" id="r1" value="1" />
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 15px">
                     <div class="vl-black">&ensp;Super High Risk</div>

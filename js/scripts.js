@@ -15,6 +15,7 @@ $(document).ready(function() {/* google maps -----------------------------------
         var center = new google.maps.LatLng(lat, lng);
         // using global variable:
         map.panTo(center);
+        map.setZoom(18);
     }
 
 
@@ -92,9 +93,11 @@ $(document).ready(function() {/* google maps -----------------------------------
             handleLocationError(false, infowindow, map.getCenter());
         }
 
-        document.getElementById("nodeGoto").addEventListener("click", function() {
+        document.getElementById("current-location").addEventListener("click", function() {
             moveToLocation(currentPos.lat, currentPos.lng);
         }, false);
+
+
 
         var marker, i, markerCount = 0;
         var posMarkers = [];
@@ -165,6 +168,7 @@ $(document).ready(function() {/* google maps -----------------------------------
         var originInput = document.getElementById('origin-input');
         var destinationInput = document.getElementById('destination-input');
         var modeSelector = document.getElementById('mode-selector');
+        //var current-location = document.getElementById('current-location');
         this.directionsService = new google.maps.DirectionsService;
         this.directionsDisplay = new google.maps.DirectionsRenderer;
         this.directionsDisplay.setMap(null);
@@ -174,10 +178,16 @@ $(document).ready(function() {/* google maps -----------------------------------
         var destinationAutocomplete = new google.maps.places.Autocomplete(
             destinationInput, {placeIdOnly: true});
         //remember the location
+        //document.getElementById('origin-input').value = "My value";
+        $("#origin-input").val(getCookie("last_orig"));
+        $("#destination-input").val(getCookie("last_dest"));
+        $("#origin-input").focus();
+
         google.maps.event.addDomListener(window, 'load', function () {
-            $("#origin-input").val(getCookie("last_orig"));
-            $("#destination-input").val(getCookie("last_dest"));
-            $("#origin-input").focus();
+            //$("#origin-input").val(getCookie("last_orig"));
+            //$("#destination-input").val(getCookie("last_dest"));
+            //$("#origin-input").focus();
+
         });
 
         this.setupPlaceChangedListener(originAutocomplete, 'ORIG');
@@ -185,9 +195,10 @@ $(document).ready(function() {/* google maps -----------------------------------
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(modeSelector);
+        //this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(current-location);
     }
 
-    function drawMarker(placeId){
+    function drawMarker(placeId) {
         var infowindow = new google.maps.InfoWindow();
         var service = new google.maps.places.PlacesService(map);
         service.getDetails({placeId: placeId}, function(place, status) {
@@ -285,6 +296,7 @@ $(document).ready(function() {/* google maps -----------------------------------
                                 if (address[i]["types"].indexOf('route') > -1) {
                                     // console.log('1');
                                     // if only number
+                                    if (address[i]['short_name'] != null){
                                     if (!isNaN(address[i]['short_name'])) {
                                         //glob_resp.routes[0].legs[0].steps[glob_counter].isInterurban=1
                                         // console.log('set route');
@@ -298,6 +310,7 @@ $(document).ready(function() {/* google maps -----------------------------------
                                         newLocations.push(singleLocation);
                                         break;
                                     }
+                                  }
                                     else {
                                         //glob_resp.routes[0].legs[0].steps[glob_counter].isInterurban=0
                                         continue
@@ -331,7 +344,7 @@ $(document).ready(function() {/* google maps -----------------------------------
     };
 
     var colors = ["Grey", "Aqua", "DarkBlue", "Yellow", "Orange", "Red", "Black"];
-    var polylines = [];
+    var polylines = new Array();
 
     //getPlaceIds(locationsPoints, locations);
     /**check if  path array contains path**/
@@ -347,54 +360,72 @@ $(document).ready(function() {/* google maps -----------------------------------
     }
 
     function colorRouteOnClick(response, routeIndex) {
-        var bounds = new google.maps.LatLngBounds();
-        //TODO: does this deletes the map?
-/*        for (var i = 0; i < polylines.length; i++) {
-            polylines[i].setMap(null);
-        }*/
-        var legs = response.routes[routeIndex].legs;
-        for (i = 0; i < legs.length; i++) {
-            var steps = legs[i].steps;
-            for (j = 0; j < steps.length; j++) {
-                var nextSegment = steps[j].path;
-                var stepPolyline = new google.maps.Polyline(polylineOptions);
-                place = findPlace(locations[j], riskResults[routeIndex])
-                if (place != -1) {
-                    stepPolyline.setOptions({
-                        strokeColor: colors[riskResults[routeIndex][place].risk + 1]
-                    })
-                }
-                else {
-                    stepPolyline.setOptions({
-                        strokeColor: colors[0]
-                    })
-                }
-                for (k = 0; k < nextSegment.length; k++) {
-                    stepPolyline.getPath().push(nextSegment[k]);
-                    bounds.extend(nextSegment[k]);
-                }
-                polylines.push(stepPolyline);
-                stepPolyline.setMap(map);
-                // route click listeners, different one on each step
-                google.maps.event.addListener(stepPolyline, 'click', function (evt) {
+      var bounds = new google.maps.LatLngBounds();
+      //TODO: does this deletes the map?
+      /*        for (var i = 0; i < polylines.length; i++) {
+      polylines[i].setMap(null);
+    }*/
+    for (var r = 0; r < response.routes.length; r++){
+      var legs = response.routes[r].legs;
+      for (i = 0; i < legs.length; i++) {
+        var steps = legs[i].steps;
+        for (j = 0; j < steps.length; j++) {
+          var nextSegment = steps[j].path;
+          var stepPolyline = new google.maps.Polyline(polylineOptions);
+          place = findPlace(roadsLocations[r][j], riskResults[r])
+          if (r != routeIndex){
+            stepPolyline.setOptions({
+              strokeColor: colors[6]
+            })
+          }
+          else if (place != -1) {
+            stepPolyline.setOptions({
+              strokeColor: colors[riskResults[r][place].risk + 1]
+            })
+          }
+          else {
+            stepPolyline.setOptions({
+              strokeColor: colors[0]
+            })
+          }
+          for (k = 0; k < nextSegment.length; k++) {
+            stepPolyline.getPath().push(nextSegment[k]);
+            bounds.extend(nextSegment[k]);
+          }
+          indexInPolylines = findPlace(stepPolyline, polylines[r]);
+          polylines[r][indexInPolylines] = stepPolyline;
+          stepPolyline.setMap(map);
+          // route click listeners, different one on each step
+          google.maps.event.addListener(stepPolyline, 'click', function (evt) {
 
-                    infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
-                    infowindow.setPosition(evt.latLng);
-                    infowindow.open(map);
-                    //var myRoute = response.routes[0].legs[0];
-                })
-            }
+            infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
+            infowindow.setPosition(evt.latLng);
+            infowindow.open(map);
+            //var myRoute = response.routes[0].legs[0];
+          })
         }
-        map.fitBounds(bounds);
+      }
     }
+    map.fitBounds(bounds);
+  }
+
 
     function renderDirectionsPolylines(response) {
+        document.getElementById("r0").addEventListener("click", function() {
+            colorRouteOnClick(response, 0);
+        }, false);
+        document.getElementById("r1").addEventListener("click", function() {
+            colorRouteOnClick(response, 1);
+        }, false);
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < polylines.length; i++) {
-            polylines[i].setMap(null);
+          for (var j = 0; j < polylines[i].length; j++)
+            polylines[i][j].setMap(null);
         }
         for (var r = 0; r < response.routes.length; r++) {
+          innerArray = new Array();
             var legs = response.routes[r].legs;
+            var polyIndex = 0
             for (i = 0; i < legs.length; i++) {
                 var steps = legs[i].steps;
                 //TODO: change steps.lenght to locations.lenght?
@@ -410,19 +441,21 @@ $(document).ready(function() {/* google maps -----------------------------------
 
                         bounds.extend(nextSegment[k]);
                     }
-                    polylines.push(stepPolyline);
+                    innerArray.push(stepPolyline);
+                    polyIndex++;
                     stepPolyline.setMap(map);
                     // route click listeners, different one on each step
-                    google.maps.event.addListener(stepPolyline, 'click', function (evt) {
+                    /*google.maps.event.addListener(stepPolyline, 'click', function (evt) {
                          infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
                          infowindow.setPosition(evt.latLng);
                          infowindow.open(map);
                          var myRoute = response.routes[0].legs[0];
                          colorRouteOnClick(response, stepPolyline.routeIndex);
 
-                    })
+                    })*/
                 }
             }
+            polylines[r] = innerArray;
         }
         map.fitBounds(bounds);
     }
