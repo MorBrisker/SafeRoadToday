@@ -87,11 +87,16 @@
             </div>
             <hr>
 
-            <input type="button" id="current-location" value="blabla" />
+            <input type="image" src="./images/gps2.png" style="width:27px; height:27px" class="controls" id="current-location" value="CENTER"/>
             <hr>
             <input type="button" id="r0" value="0" />
-            <hr>
             <input type="button" id="r1" value="1" />
+            <hr>
+            <input type="button" id="clear" value="clear" />
+            <hr>
+            <input type="button" id="showAll" value="Show All" />
+            <hr>
+            <p id="change_routes"></p>
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 15px">
                     <div class="vl-black">&ensp;Super High Risk</div>

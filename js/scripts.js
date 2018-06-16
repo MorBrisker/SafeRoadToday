@@ -10,6 +10,7 @@ $(document).ready(function() {/* google maps -----------------------------------
     var currentPos;
     var mark;
     var riskResults=[];
+    var polylines = [];
 
     function moveToLocation(lat, lng){
         var center = new google.maps.LatLng(lat, lng);
@@ -97,7 +98,10 @@ $(document).ready(function() {/* google maps -----------------------------------
             moveToLocation(currentPos.lat, currentPos.lng);
         }, false);
 
+        document.getElementById("showAll").addEventListener("click", function() {
+            notClearRoutes();
 
+        }, true);
 
         var marker, i, markerCount = 0;
         var posMarkers = [];
@@ -168,7 +172,7 @@ $(document).ready(function() {/* google maps -----------------------------------
         var originInput = document.getElementById('origin-input');
         var destinationInput = document.getElementById('destination-input');
         var modeSelector = document.getElementById('mode-selector');
-        //var current-location = document.getElementById('current-location');
+        var currentLocation = document.getElementById('current-location');
         this.directionsService = new google.maps.DirectionsService;
         this.directionsDisplay = new google.maps.DirectionsRenderer;
         this.directionsDisplay.setMap(null);
@@ -195,6 +199,7 @@ $(document).ready(function() {/* google maps -----------------------------------
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
         this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(modeSelector);
+        this.map.controls[google.maps.ControlPosition.TOP_RIGHT].push(currentLocation);
         //this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(current-location);
     }
 
@@ -322,7 +327,8 @@ $(document).ready(function() {/* google maps -----------------------------------
 
                             }
                         }
-                        console.log(placeIds.snappedPoints);
+                        // console.log("blablabla: " + newLocations.length);
+                        // console.log(placeIds.snappedPoints);
                         if (counter == placeIds.snappedPoints.length - 1) {
                             console.log('finish');
                             console.log(newLocations);
@@ -344,7 +350,7 @@ $(document).ready(function() {/* google maps -----------------------------------
     };
 
     var colors = ["Grey", "Aqua", "DarkBlue", "Yellow", "Orange", "Red", "Black"];
-    var polylines = new Array();
+
 
     //getPlaceIds(locationsPoints, locations);
     /**check if  path array contains path**/
@@ -358,65 +364,119 @@ $(document).ready(function() {/* google maps -----------------------------------
         }
         return -1
     }
-
-    function colorRouteOnClick(response, routeIndex) {
-      var bounds = new google.maps.LatLngBounds();
-      //TODO: does this deletes the map?
-      /*        for (var i = 0; i < polylines.length; i++) {
-      polylines[i].setMap(null);
-    }*/
-    for (var r = 0; r < response.routes.length; r++){
-      var legs = response.routes[r].legs;
-      for (i = 0; i < legs.length; i++) {
-        var steps = legs[i].steps;
-        for (j = 0; j < steps.length; j++) {
-          var nextSegment = steps[j].path;
-          var stepPolyline = new google.maps.Polyline(polylineOptions);
-          place = findPlace(roadsLocations[r][j], riskResults[r])
-          if (r != routeIndex){
-            stepPolyline.setOptions({
-              strokeColor: colors[6]
-            })
-          }
-          else if (place != -1) {
-            stepPolyline.setOptions({
-              strokeColor: colors[riskResults[r][place].risk + 1]
-            })
-          }
-          else {
-            stepPolyline.setOptions({
-              strokeColor: colors[0]
-            })
-          }
-          for (k = 0; k < nextSegment.length; k++) {
-            stepPolyline.getPath().push(nextSegment[k]);
-            bounds.extend(nextSegment[k]);
-          }
-          indexInPolylines = findPlace(stepPolyline, polylines[r]);
-          polylines[r][indexInPolylines] = stepPolyline;
-          stepPolyline.setMap(map);
-          // route click listeners, different one on each step
-          google.maps.event.addListener(stepPolyline, 'click', function (evt) {
-
-            infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
-            infowindow.setPosition(evt.latLng);
-            infowindow.open(map);
-            //var myRoute = response.routes[0].legs[0];
-          })
+    function clearRoutes(index) {
+      //var bounds = new google.maps.LatLngBounds();
+      for (var i = 0; i < polylines.length; i++) {
+        for (var j = 0; j < polylines[i].length; j++) {
+          /*polylines[i][j].setOptions({
+            strokeColor: "Red"
+          })*/
+          polylines[i][j].setMap(null);
         }
       }
+      //map.fitBounds(bounds)
     }
-    map.fitBounds(bounds);
-  }
+    function notClearRoutes() {
+      //var bounds = new google.maps.LatLngBounds();
+      for (var i = 0; i < polylines.length; i++) {
+        for (var j = 0; j < polylines[i].length; j++) {
+          polylines[i][j].setOptions({
+            strokeColor: "Black"
+          })
+          polylines[i][j].setMap(map);
+        }
+      }
+      //map.fitBounds(bounds)
+    }
+
+    function add(type, index) {
+      //Create an input type dynamically.
+      var element = document.createElement("input");
+      //Assign different attributes to the element.
+      element.style = "margin-right:5px;"
+      element.type = type;
+      element.value = "Route " + index; // Really? You want the default value to be the type string?
+      element.name = type; // And the name too?
+      element.onclick = function() { // Note this is a function
+        colorRouteOnClick(index);
+      };
+
+      var buttons = document.getElementById("change_routes");
+      //Append the element in page (in span).
+      buttons.appendChild(element);
+    }
+    /*function colorRouteOnClick(response, routeIndex) {
+      var bounds = new google.maps.LatLngBounds();
+      for (var r = 0; r < response.routes.length; r++){
+        var legs = response.routes[r].legs;
+        for (i = 0; i < legs.length; i++) {
+          var steps = legs[i].steps;
+          for (j = 0; j < steps.length; j++) {
+            var nextSegment = steps[j].path;
+            var stepPolyline = new google.maps.Polyline(polylineOptions);
+            place = findPlace(roadsLocations[r][j], riskResults[r])
+            if (r != routeIndex){
+              stepPolyline.setOptions({
+                strokeColor: colors[6]
+              })
+            }
+            else if (place != -1) {
+              stepPolyline.setOptions({
+                strokeColor: colors[riskResults[r][place].risk + 1]
+              })
+            }
+            else {
+              stepPolyline.setOptions({
+                strokeColor: colors[0]
+              })
+            }
+            for (k = 0; k < nextSegment.length; k++) {
+              stepPolyline.getPath().push(nextSegment[k]);
+              bounds.extend(nextSegment[k]);
+            }
+            stepPolyline.setMap(map);
+          }
+        }
+      }
+      map.fitBounds(bounds);
+    }*/
+    function colorRouteOnClick(routeIndex) {
+      var bounds = new google.maps.LatLngBounds();
+
+      for (var i = 0; i < polylines.length; i++) {
+        clearRoutes(i);
+        if (i != routeIndex){
+        for(var j = 0; j < polylines[i].length; j++){
+            polylines[i][j].setOptions({
+              strokeColor: colors[6]
+            })
+            polylines[i][j].setMap(map);
+          }
+        }
+      }
+      clearRoutes(routeIndex);
+      for(var j = 0; j < polylines[routeIndex].length; j++){
+        console.log(roadsLocations);
+        console.log(riskResults);
+        console.log("routeIndex: " + routeIndex);
+        console.log("j: " + j);
+        var place = findPlace(roadsLocations[routeIndex][j], riskResults[routeIndex]);
+        if (place != -1) {
+          polylines[routeIndex][j].setOptions({
+            strokeColor: colors[riskResults[routeIndex][place].risk + 1]
+          })
+        }
+        else {
+          polylines[routeIndex][j].setOptions({
+            strokeColor: colors[0]
+          })
+        }
+        polylines[routeIndex][j].setMap(map);
+      }
+    }
 
 
-    function renderDirectionsPolylines(response) {
-        document.getElementById("r0").addEventListener("click", function() {
-            colorRouteOnClick(response, 0);
-        }, false);
-        document.getElementById("r1").addEventListener("click", function() {
-            colorRouteOnClick(response, 1);
-        }, false);
+    /*function renderDirectionsPolylines(response) {
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < polylines.length; i++) {
           for (var j = 0; j < polylines[i].length; j++)
@@ -444,18 +504,51 @@ $(document).ready(function() {/* google maps -----------------------------------
                     innerArray.push(stepPolyline);
                     polyIndex++;
                     stepPolyline.setMap(map);
-                    // route click listeners, different one on each step
-                    /*google.maps.event.addListener(stepPolyline, 'click', function (evt) {
-                         infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
-                         infowindow.setPosition(evt.latLng);
-                         infowindow.open(map);
-                         var myRoute = response.routes[0].legs[0];
-                         colorRouteOnClick(response, stepPolyline.routeIndex);
-
-                    })*/
                 }
             }
             polylines[r] = innerArray;
+        }
+        map.fitBounds(bounds);
+    }*/
+    function renderDirectionsPolylines() {
+        document.getElementById("change_routes").innerHTML="";
+        var bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < polylines.length; i++) {
+            for(var j = 0; j < polylines[i].length; j++) {
+                polylines[i][j].setMap(null);
+            }
+        }
+        for (var r = 0; r < glob_resp.routes.length; r++) {
+            add("button", r);
+            var legs = glob_resp.routes[r].legs;
+            for (i = 0; i < legs.length; i++) {
+                var steps = legs[i].steps;
+                //TODO: change steps.lenght to locations.lenght?
+                //var myPolyline = [];
+                polylines[r] = []
+                for (j = 0; j < steps.length; j++) {
+                    var nextSegment = steps[j].path;
+                    var stepPolyline = new google.maps.Polyline(polylineOptions);
+                    stepPolyline.routeIndex = r;
+                    stepPolyline.setOptions({strokeColor: "Black"});
+                    for (k = 0; k < nextSegment.length; k++) {
+                        stepPolyline.getPath().push(nextSegment[k]);
+                        bounds.extend(nextSegment[k]);
+                    }
+                    stepPolyline.setMap(map);
+                    //myPolyline.push(stepPolyline);
+                    // route click listeners, different one on each step
+                    google.maps.event.addListener(stepPolyline, 'click', function (evt) {
+                         infowindow.setContent("you clicked on the route<br>" + evt.latLng.toUrlValue(6));
+                         infowindow.setPosition(evt.latLng);
+                         infowindow.open(map);
+                         colorRouteOnClick(stepPolyline.routeIndex);
+                    })
+                    polylines[r].push(stepPolyline);
+                }
+                //polylines[r].push(myPolyline);
+
+            }
         }
         map.fitBounds(bounds);
     }
@@ -497,9 +590,8 @@ $(document).ready(function() {/* google maps -----------------------------------
             },
             success: function (result) {
                 // We do something with the returned data.
-                alert("resulty: " + result);
+                //alert("resulty: " + result);
                 riskResults.push(JSON.parse(result));
-                renderDirectionsPolylines(glob_resp);
             }
         });
 
@@ -525,12 +617,16 @@ $(document).ready(function() {/* google maps -----------------------------------
         }, function (response, status) {
             if (status === 'OK') {
                 var myRoutes = response.routes;
+                riskResults=[];
+                glob_resp = response;
+                renderDirectionsPolylines();
+
                 //alert(JSON.stringify(myRoute));
                 //console.log("origin: " + myRoute.end_location.lat.so);
                 //console.log("desitination: " + myRoute.start_location.lat["[[Scopes]]"]["0"].a + "," + myRoute.start_location.lat["[[Scopes]]"]["0"].b);
                 // for nearestRoad check
                 var index = 0;
-                glob_resp = response;
+
                 roadsLocationsPoints = [];
                 roadsLocations = [];
                 results = [];
@@ -564,8 +660,8 @@ $(document).ready(function() {/* google maps -----------------------------------
                     roadsLocations.push(locations);
                     roadsLocationsPoints.push(locationsPoints);
                     console.log("locations before getPlaceIds: " + locationsPoints);
-                    getPlaceIds(roadsLocationsPoints[j], roadsLocations[j]);
 
+                    getPlaceIds(roadsLocationsPoints[j], roadsLocations[j]);
 
                     //TODO:get resultys for the different routes
 /*                    $.ajax({
