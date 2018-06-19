@@ -20,8 +20,9 @@
     <![endif]-->
     <link href="css/styles.css" rel="stylesheet">
 </head>
-<body>
+<body style="margin:0;">
 <!-- begin template -->
+<div id="loader" style="display: none;"></div>
 <div class="navbar navbar-custom navbar-fixed-top">
     <div class="navbar-header"><a class="navbar-brand" href="#">SafeRoadToday</a>
         <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -42,18 +43,7 @@
             <div class="form-group" style="display:inline;">
                 <div class="input-group">
                     <div class="input-group-btn">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span
-                                    class="glyphicon glyphicon-chevron-down"></span></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Category 1</a></li>
-                            <li><a href="#">Category 2</a></li>
-                            <li><a href="#">Category 3</a></li>
-                            <li><a href="#">Category 4</a></li>
-                            <li><a href="#">Category 5</a></li>
-                        </ul>
                     </div>
-                    <input type="text" class="form-control" placeholder="Get me there safe">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span> </span>
                 </div>
             </div>
         </form>
@@ -61,7 +51,7 @@
 </div>
 
 <div id="map-canvas"></div>
-<div class="container-fluid" id="main">
+<div class="container-fluid" id="main" class="animate-bottom">
     <div class="row">
         <div class="col-xs-3" id="left">
             <h2>Safe road today</h2>
@@ -75,9 +65,6 @@
                    placeholder="Enter an origin location">
             <input id="destination-input" class="controls" type="text"
                    placeholder="Enter a destination location">
-
-
-            <div id="map-canvas"></div>
             <br>
             <br>
             <div class="panel panel-default">
@@ -88,15 +75,10 @@
             <hr>
 
             <input type="image" src="./images/gps2.png" style="width:27px; height:27px" class="controls" id="current-location" value="CENTER"/>
-            <hr>
-            <input type="button" id="r0" value="0" />
-            <input type="button" id="r1" value="1" />
-            <hr>
-            <input type="button" id="clear" value="clear" />
-            <hr>
-            <input type="button" id="showAll" value="Show All" />
-            <hr>
-            <p id="change_routes"></p>
+            <div>
+            <input type="button" id="showAllRoutes" value="Show All Routes" style="padding: 5px; display: none;"/>
+                <hr>
+                <p id="change_routes"></p>
             <div class="panel panel-default">
                 <div class="panel-heading" style="font-size: 15px">
                     <div class="vl-black">&ensp;Super High Risk</div>
@@ -112,7 +94,9 @@
                     <div class="vl-aqua">&ensp;Low Risk</div>
                     <br>
                     <div class="vl-grey">&ensp;Undefined risk</div>
+                    <br>
                 </div>
+            </div>
             </div>
             <p>
                 <a href="http://bootply.com" target="_ext" class="center-block btn btn-primary">Set day and time</a>

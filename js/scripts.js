@@ -11,14 +11,18 @@ $(document).ready(function() {/* google maps -----------------------------------
     var mark;
     var riskResults=[];
     var polylines = [];
+    var myVar;
+    var noRisks=[];
+    var markers=[];
+    var marker_glob;
 
     function moveToLocation(lat, lng){
         var center = new google.maps.LatLng(lat, lng);
         // using global variable:
+        marker_glob.setMap(map);
         map.panTo(center);
         map.setZoom(18);
     }
-
 
 
     function setCookie(cname, cvalue, exdays) {
@@ -79,7 +83,7 @@ $(document).ready(function() {/* google maps -----------------------------------
                 //infowindow.setPosition(pos);
                 //infowindow.setContent('Location found.');
                 //infowindow.open(map);
-                marker = new google.maps.Marker({
+                marker_glob = new google.maps.Marker({
                     position: new google.maps.LatLng(pos.lat, pos.lng),
                     map: map,
                     visible: true
@@ -98,7 +102,7 @@ $(document).ready(function() {/* google maps -----------------------------------
             moveToLocation(currentPos.lat, currentPos.lng);
         }, false);
 
-        document.getElementById("showAll").addEventListener("click", function() {
+        document.getElementById("showAllRoutes").addEventListener("click", function() {
             notClearRoutes();
 
         }, true);
@@ -208,11 +212,12 @@ $(document).ready(function() {/* google maps -----------------------------------
         var service = new google.maps.places.PlacesService(map);
         service.getDetails({placeId: placeId}, function(place, status) {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                var marker = new google.maps.Marker({
+                var marker_temp = new google.maps.Marker({
                     map: map,
                     position: place.geometry.location
                 });
-                google.maps.event.addListener(marker, 'click', function() {
+                markers.push(marker_temp);
+                google.maps.event.addListener(marker_temp, 'click', function() {
                     infowindow.setContent('<div><strong>' + place.name + '</strong><br>' +
                         'Place ID: ' + placeId + '<br>' +
                         place.formatted_address + '</div>');
@@ -242,6 +247,7 @@ $(document).ready(function() {/* google maps -----------------------------------
             setCookie("last_orig", document.getElementById('origin-input').value, 1);
             setCookie("last_dest", document.getElementById('destination-input').value, 1);
             me.route();
+
         });
 
     };
@@ -301,21 +307,20 @@ $(document).ready(function() {/* google maps -----------------------------------
                                 if (address[i]["types"].indexOf('route') > -1) {
                                     // console.log('1');
                                     // if only number
-                                    if (address[i]['short_name'] != null){
-                                    if (!isNaN(address[i]['short_name'])) {
-                                        //glob_resp.routes[0].legs[0].steps[glob_counter].isInterurban=1
-                                        // console.log('set route');
-                                        // console.log(locations[counter]);
-                                        console.log(address[i]['short_name']);
-                                        console.log(parseInt(address[i]['short_name']));
-                                        console.log(locations[counter]);
-                                        locations[counter]["route"] = parseInt(address[i]['short_name']);
-                                        singleLocation = locations[counter];
-
-                                        newLocations.push(singleLocation);
-                                        break;
+                                    if (address[i]['short_name'] != null) {
+                                        if (!isNaN(address[i]['short_name']) && locations[counter]!=undefined) {
+                                            //glob_resp.routes[0].legs[0].steps[glob_counter].isInterurban=1
+                                            // console.log('set route');
+                                            // console.log(locations[counter]);
+                                            console.log(address[i]['short_name']);
+                                            console.log(parseInt(address[i]['short_name']));
+                                            console.log(locations[counter]);
+                                            locations[counter]["route"] = parseInt(address[i]['short_name']);
+                                            singleLocation = locations[counter];
+                                            newLocations.push(singleLocation);
+                                            break;
+                                        }
                                     }
-                                  }
                                     else {
                                         //glob_resp.routes[0].legs[0].steps[glob_counter].isInterurban=0
                                         continue
@@ -333,6 +338,9 @@ $(document).ready(function() {/* google maps -----------------------------------
                             console.log('finish');
                             console.log(newLocations);
                             console.log(getRouteRiskLevel(newLocations));
+                            if(newLocations.length <= 0){
+                                noRisks.push(i);
+                            }
                         }
                         counter++;
                     }
@@ -341,6 +349,7 @@ $(document).ready(function() {/* google maps -----------------------------------
                 xhttp.send();
             }
         }
+
     }
 
     var polylineOptions = {
@@ -441,38 +450,47 @@ $(document).ready(function() {/* google maps -----------------------------------
       map.fitBounds(bounds);
     }*/
     function colorRouteOnClick(routeIndex) {
-      var bounds = new google.maps.LatLngBounds();
-
-      for (var i = 0; i < polylines.length; i++) {
-        clearRoutes(i);
-        if (i != routeIndex){
-        for(var j = 0; j < polylines[i].length; j++){
-            polylines[i][j].setOptions({
-              strokeColor: colors[6]
-            })
-            polylines[i][j].setMap(map);
-          }
+        var bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < polylines.length; i++) {
+            clearRoutes(i);
+            if (i != routeIndex) {
+                for (var j = 0; j < polylines[i].length; j++) {
+                    polylines[i][j].setOptions({
+                        strokeColor: colors[6]
+                    })
+                    polylines[i][j].setMap(map);
+                }
+            }
         }
-      }
-      clearRoutes(routeIndex);
-      for(var j = 0; j < polylines[routeIndex].length; j++){
-        console.log(roadsLocations);
-        console.log(riskResults);
-        console.log("routeIndex: " + routeIndex);
-        console.log("j: " + j);
-        var place = findPlace(roadsLocations[routeIndex][j], riskResults[routeIndex]);
-        if (place != -1) {
-          polylines[routeIndex][j].setOptions({
-            strokeColor: colors[riskResults[routeIndex][place].risk + 1]
-          })
+        clearRoutes(routeIndex);
+        if (noRisks.includes(routeIndex)) {
+            for (var j = 0; j < polylines[routeIndex].length; j++) {
+                polylines[routeIndex][j].setOptions({
+                    strokeColor: colors[0]
+                })
+                polylines[routeIndex][j].setMap(map);
+            }
         }
         else {
-          polylines[routeIndex][j].setOptions({
-            strokeColor: colors[0]
-          })
+            for (var j = 0; j < polylines[routeIndex].length; j++) {
+                console.log(roadsLocations);
+                console.log(riskResults);
+                console.log("routeIndex: " + routeIndex);
+                console.log("j: " + j);
+                var place = findPlace(roadsLocations[routeIndex][j], riskResults[routeIndex]);
+                if (place != -1) {
+                    polylines[routeIndex][j].setOptions({
+                        strokeColor: colors[riskResults[routeIndex][place].risk + 1]
+                    })
+                }
+                else {
+                    polylines[routeIndex][j].setOptions({
+                        strokeColor: colors[0]
+                    })
+                }
+                polylines[routeIndex][j].setMap(map);
+            }
         }
-        polylines[routeIndex][j].setMap(map);
-      }
     }
 
 
@@ -511,7 +529,22 @@ $(document).ready(function() {/* google maps -----------------------------------
         map.fitBounds(bounds);
     }*/
     function renderDirectionsPolylines() {
+        //marker_glob.setMap(null);
+        if (markers.length > 2) {
+            markers[0].setMap(null);
+            markers.splice(0,1);
+        }
+
         document.getElementById("change_routes").innerHTML="";
+        $("#showAllRoutes").show();
+        $("#change_routes").show();
+        var bla = document.createTextNode("Select Route: ");
+        var br = document.createElement("br");
+
+
+        var buttons = document.getElementById("change_routes");
+        buttons.appendChild(bla);
+        buttons.appendChild(br);
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < polylines.length; i++) {
             for(var j = 0; j < polylines[i].length; j++) {
@@ -592,6 +625,8 @@ $(document).ready(function() {/* google maps -----------------------------------
                 // We do something with the returned data.
                 //alert("resulty: " + result);
                 riskResults.push(JSON.parse(result));
+                document.getElementById("loader").style.display = "none";
+                //document.getElementById("myDiv").style.display = "block";
             }
         });
 
@@ -606,6 +641,7 @@ $(document).ready(function() {/* google maps -----------------------------------
     }
 
     AutocompleteDirectionsHandler.prototype.route = function () {
+
         if (!this.originPlaceId || !this.destinationPlaceId) {
             return;
         }
@@ -615,6 +651,7 @@ $(document).ready(function() {/* google maps -----------------------------------
             provideRouteAlternatives: true,
             travelMode: this.travelMode
         }, function (response, status) {
+            document.getElementById("loader").style.display = "block";
             if (status === 'OK') {
                 var myRoutes = response.routes;
                 riskResults=[];
