@@ -11,7 +11,6 @@ $(document).ready(function() {/* google maps -----------------------------------
     var mark;
     var riskResults=[];
     var polylines = [];
-    var myVar;
     var noRisks=[];
     var markers=[];
     var marker_glob;
